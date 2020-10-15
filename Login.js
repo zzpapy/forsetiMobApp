@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { StyleSheet, TextInput ,Text, Alert, Button, View } from 'react-native'
-import { jsonldFetch } from './ForsetiApi'
+import { StyleSheet, TextInput ,Text, Alert, Button, View,ActivityIndicator } from 'react-native'
+import { associePageFetch, getScm ,getCoeffSpe ,jsonldFetch} from './ForsetiApi'
 import AsyncStorage from '@react-native-community/async-storage';
+import jwt_decode from "jwt-decode"
 
 export default class Login extends Component {
   constructor(props) {
@@ -10,6 +11,7 @@ export default class Login extends Component {
     this.state = {
       username: '',
       password: '',
+      isLoading: false
     };
   }
 
@@ -24,6 +26,7 @@ export default class Login extends Component {
  
   }
   async onLogin() {
+    this.setState({ isLoading: true });
     const { username, password } = this.state;
     await jsonldFetch(this.state).then(token => {
       this.setState({ token })
@@ -33,11 +36,27 @@ export default class Login extends Component {
         const { navigate } = this.props.navigation;
         if(this.state.token){
           await AsyncStorage.setItem('token', this.state.token.token)
-          await navigate('Home',{ token: this.state.token })
+          let associe = await associePageFetch(this.state.token.token).then(async associe => {
+              this.setState({ associe })
+              const { navigate } = this.props.navigation; 
+              let tokenParsed = jwt_decode(this.state.token.token)
+              var userEmail = tokenParsed.username
+              for(let i=0; i< this.state.associe['hydra:member'].length;i++){
+                if(this.state.associe['hydra:member'][i].email == userEmail){
+                  var user = this.state.associe['hydra:member'][i]
+                  
+                    this.setState({ user:user })
+                }
+              }    
+            })
+            this.setState({ isLoading: false });
+          await navigate('Home',{ token: this.state.token , user:this.state.user})
         }
         else{
           navigate('Login')
         }         
+        let token = await AsyncStorage.getItem('token')
+        
       }
     )
   }
@@ -46,10 +65,12 @@ export default class Login extends Component {
   }
   
   render() {
-    
+    console.log(this.state.isLoading)
     const { navigate } = this.props.navigation;
     return (
       <View style={styles.container}>
+        
+        {this.state.isLoading && <ActivityIndicator color={"#000"} />}
         <Text>gregory.pace@hotmail.fr</Text>
         <TextInput
           value={this.state.username}

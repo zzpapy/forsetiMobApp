@@ -2,13 +2,7 @@ import React from 'react';
 import Home from './Home';
 import Login from './Login';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-
-import {decode, encode} from 'base64-js'
-
-if (!global.btoa) {  global.btoa = encode }
-
-if (!global.atob) { global.atob = decode }
+import { createStackNavigator } from '@react-navigation/stack'; 
  
  
 const RootStack = createStackNavigator();

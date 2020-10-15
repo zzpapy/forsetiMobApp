@@ -44,3 +44,19 @@ export  const getScm = async (data,user) => {
         console.error(error);
     })
 }
+
+export  const getCoeffSpe = async (data,user,scm) => {
+    console.log(scm)
+    return await fetch('http://192.168.1.81:8000/api/profile/'+user+'/'+scm, {
+        method: 'GET',
+        headers: {
+            Accept: 'application/ld+json',
+            'Content-Type': 'application/json',
+            'authorization' :"Bearer "+data 
+        }
+        })
+        .then((response) => response.json())
+        .catch((error) => {
+        console.error(error);
+    })
+}
